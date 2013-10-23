@@ -110,10 +110,9 @@ public class ProviderService extends ProviderServiceBase {
 		if (logoElem != null)
 		{
 			String relLogoUrl = logoElem.attr("src");
-			String relLogoUrlFiletype = relLogoUrl.substring(relLogoUrl.lastIndexOf("."));
-			String logoFileName = band.getBandname() + "_logo" + relLogoUrlFiletype;
-
-			if ( downloadFile.downloadUrlToFile(Url + relLogoUrl, logoFileName ) )
+			
+			String logoFileName = getBandLogo(Url + relLogoUrl, band.getBandname());
+			if ( logoFileName != null)
 				band.setLogoFile(logoFileName);
 		}
 
@@ -123,14 +122,14 @@ public class ProviderService extends ProviderServiceBase {
 		if (fotoElem != null)
 		{
 			String relFotoUrl = fotoElem.attr("src");
-			String relFotoUrlFiletype = relFotoUrl.substring(relFotoUrl.lastIndexOf("."));
-			String fotoFileName =  band.getBandname() + relFotoUrlFiletype;
-
-			if ( downloadFile.downloadUrlToFile(Url + relFotoUrl, fotoFileName) )
+		
+			String fotoFileName =  getBandPicture(Url + relFotoUrl, band.getBandname() );
+			if ( fotoFileName != null )
 				band.setFotoFile(fotoFileName);
 		}
 
 		// flavors
+		// no band flavors on the web page itself
 		FlavorProvider fp = new FlavorProvider();		
 		for (String flavor : fp.getFlavors(band.getBandname()))
 			band.addFlavor(flavor);
@@ -179,13 +178,13 @@ public class ProviderService extends ProviderServiceBase {
 	protected News getNewsDetailed(News news)
 	{
 		String page = downloadFile.downloadUrl(Url + news.getMessage());
-		Document doc = Jsoup.parse(page, "UTF-8");
+		Document doc = Jsoup.parse(page.replaceAll("<br />", "FestivalAppbr2n"), "UTF-8");
 		
 		Element e = doc.getElementsByClass("header1").first().parent();
 		if (e != null)
 		{
 			// get message		
-			news.setMessage(e.getElementsByClass("content").text());
+			news.setMessage(e.getElementsByClass("content").text().replaceAll("FestivalAppbr2n", "\n"));
 		
 			// get add date
 			String date = e.getElementsByClass("copyrightline").first().text();
